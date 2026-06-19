@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FeedTheNeed — Donate Surplus Food</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --green-50: #edf7f0; --green-100: #c6e9cf;
+    --green-500: #2e7d52; --green-600: #246342; --green-700: #1a4a31;
+    --gray-50: #f8f9fa; --gray-100: #f0f2f4; --gray-200: #e2e6ea;
+    --gray-300: #ced4da; --gray-400: #9da8b3; --gray-500: #6b7684;
+    --gray-700: #374151; --gray-900: #111827; --white: #ffffff;
+    --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
+    --transition: 0.18s ease;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: #f0f4f1; color: var(--gray-900); font-size: 14px; line-height: 1.6; min-height: 100vh; }
+
+  /* HEADER */
+  header { background: var(--white); border-bottom: 1px solid var(--gray-200); position: sticky; top: 0; z-index: 100; }
+  .header-inner { max-width: 1060px; margin: 0 auto; padding: 0 24px; height: 60px; display: flex; align-items: center; justify-content: space-between; }
+  .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 600; font-size: 17px; color: var(--gray-900); letter-spacing: -0.3px; }
+  .logo-icon { width: 34px; height: 34px; background: var(--green-500); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 15px; }
+  .logo em { color: var(--green-500); font-style: normal; }
+  nav { display: flex; align-items: center; gap: 6px; }
+  nav a { color: var(--gray-500); text-decoration: none; font-size: 13.5px; padding: 6px 12px; border-radius: var(--radius-sm); transition: color var(--transition), background var(--transition); font-weight: 500; }
+  nav a:hover { color: var(--gray-900); background: var(--gray-100); }
+  .nav-cta { background: var(--green-500) !important; color: var(--white) !important; padding: 8px 16px !important; }
+  .nav-cta:hover { background: var(--green-600) !important; }
+
+  /* HERO */
+  .hero { background: linear-gradient(135deg, #1a4a31 0%, #2e7d52 60%, #3a9e6b 100%); padding: 56px 24px 48px; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; top: -80px; right: -80px; width: 320px; height: 320px; border-radius: 50%; background: rgba(255,255,255,.04); pointer-events: none; }
+  .hero::after { content: ''; position: absolute; bottom: -60px; left: 30%; width: 200px; height: 200px; border-radius: 50%; background: rgba(255,255,255,.03); pointer-events: none; }
+  .hero-inner { max-width: 1060px; margin: 0 auto; position: relative; }
+  .hero-eyebrow { display: inline-flex; align-items: center; gap: 7px; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.18); border-radius: 100px; padding: 5px 14px; font-size: 12px; font-weight: 500; color: rgba(255,255,255,.85); letter-spacing: 0.4px; text-transform: uppercase; margin-bottom: 20px; animation: fadeDown .5s ease both; }
+  .hero h1 { font-size: clamp(26px, 4vw, 36px); font-weight: 600; color: #fff; line-height: 1.25; max-width: 520px; letter-spacing: -0.5px; margin-bottom: 12px; animation: fadeDown .5s .08s ease both; }
+  .hero p { color: rgba(255,255,255,.7); max-width: 420px; margin-bottom: 36px; font-size: 15px; animation: fadeDown .5s .16s ease both; }
+  .hero-stats { display: flex; gap: 36px; flex-wrap: wrap; animation: fadeDown .5s .24s ease both; }
+  .hero-stat strong { display: block; font-size: 26px; font-weight: 600; color: #fff; letter-spacing: -0.5px; line-height: 1; margin-bottom: 3px; }
+  .hero-stat span { font-size: 12px; color: rgba(255,255,255,.55); text-transform: uppercase; letter-spacing: 0.4px; font-weight: 500; }
+
+  /* LAYOUT */
+  main { max-width: 1060px; margin: 0 auto; padding: 32px 24px 60px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+  @media (max-width: 760px) { main { grid-template-columns: 1fr; } }
+
+  /* STEPS */
+  .steps-bar { max-width: 1060px; margin: 0 auto; padding: 20px 24px 0; display: flex; align-items: center; }
+  .step { display: flex; align-items: center; gap: 8px; flex: 1; }
+  .step-circle { width: 28px; height: 28px; border-radius: 50%; background: var(--white); border: 2px solid var(--gray-300); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: var(--gray-400); flex-shrink: 0; transition: all .3s ease; }
+  .step.active .step-circle { background: var(--green-500); border-color: var(--green-500); color: #fff; }
+  .step-label { font-size: 12.5px; font-weight: 500; color: var(--gray-400); }
+  .step.active .step-label { color: var(--gray-900); }
+  .step-line { flex: 1; height: 1.5px; background: var(--gray-200); margin: 0 8px; max-width: 50px; }
+  @media (max-width: 600px) { .steps-bar { display: none; } }
+
+  /* CARDS */
+  .card { background: var(--white); border: 1px solid var(--gray-200); border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow-sm); animation: fadeUp .4s ease both; transition: box-shadow var(--transition); }
+  .card:hover { box-shadow: var(--shadow-md); }
+  .card-title { font-size: 15px; font-weight: 600; color: var(--gray-900); margin-bottom: 3px; letter-spacing: -0.2px; }
+  .card-sub { font-size: 12.5px; color: var(--gray-400); margin-bottom: 20px; }
+  .section-label { font-size: 11px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; color: var(--green-500); margin-bottom: 4px; }
+  .card:nth-child(1) { animation-delay: .05s; }
+  .card:nth-child(2) { animation-delay: .10s; }
+  .card:nth-child(3) { animation-delay: .15s; }
+  .card:nth-child(4) { animation-delay: .20s; }
+
+  /* FORM */
+  .field { margin-bottom: 16px; }
+  .field:last-child { margin-bottom: 0; }
+  label { display: block; font-size: 11.5px; font-weight: 600; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  label .opt { font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--gray-400); font-size: 11px; }
+  input[type=text], input[type=tel], input[type=email], input[type=number], select, textarea {
+    width: 100%; border: 1.5px solid var(--gray-200); border-radius: var(--radius-sm); padding: 10px 13px;
+    font-size: 14px; font-family: inherit; background: var(--gray-50); color: var(--gray-900);
+    transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+    outline: none; appearance: none;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--green-500); background: var(--white); box-shadow: 0 0 0 3px rgba(46,125,82,.1); }
+  input::placeholder, textarea::placeholder { color: var(--gray-300); }
+  select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7684' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; }
+  textarea { resize: vertical; min-height: 80px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  /* BUTTONS */
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 10px 18px; border-radius: var(--radius-sm); font-family: inherit; font-size: 13.5px; font-weight: 500; cursor: pointer; border: none; transition: background var(--transition), transform .1s ease, box-shadow var(--transition); }
+  .btn:active { transform: scale(0.975); }
+  .btn i { font-size: 13px; }
+  .btn-green { background: var(--green-500); color: #fff; }
+  .btn-green:hover { background: var(--green-600); box-shadow: 0 4px 12px rgba(46,125,82,.25); }
+  .btn-outline { background: transparent; color: var(--gray-700); border: 1.5px solid var(--gray-200); }
+  .btn-outline:hover { background: var(--gray-100); }
+  .btn-blue { background: #3b82f6; color: #fff; }
+  .btn-blue:hover { background: #2563eb; }
+
+  /* LOCATION */
+  .loc-status { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--gray-500); margin: 12px 0; }
+  .loc-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gray-300); transition: background .3s ease; flex-shrink: 0; }
+  .loc-dot.active { background: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,.2); }
+  #map-placeholder { height: 220px; background: var(--gray-100); border: 1.5px dashed var(--gray-300); border-radius: var(--radius-md); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: var(--gray-400); font-size: 13px; }
+  #map-placeholder i { font-size: 28px; opacity: .45; }
+  #map { height: 220px; border-radius: var(--radius-md); display: none; overflow: hidden; }
+
+  /* UPLOAD */
+  .upload-zone { border: 1.5px dashed var(--gray-300); border-radius: var(--radius-md); padding: 28px 20px; text-align: center; cursor: pointer; transition: border-color var(--transition), background var(--transition); position: relative; background: var(--gray-50); }
+  .upload-zone:hover, .upload-zone.drag-over { border-color: var(--green-500); background: var(--green-50); }
+  .upload-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; border: none; background: none; padding: 0; box-shadow: none; }
+  .upload-zone i { font-size: 26px; color: var(--gray-400); margin-bottom: 8px; display: block; }
+  .upload-label { font-size: 13px; color: var(--gray-500); }
+  .upload-label strong { color: var(--green-500); }
+  .upload-hint { font-size: 11.5px; color: var(--gray-400); margin-top: 4px; }
+  #preview { display: none; width: 100%; max-height: 200px; object-fit: cover; border-radius: var(--radius-md); margin-top: 14px; border: 1px solid var(--gray-200); animation: fadeUp .3s ease; }
+
+  /* STORAGE MSG */
+  .storage-row { display: flex; gap: 10px; margin-top: 14px; }
+  #storageMsg { display: none; font-size: 12.5px; color: var(--green-600); margin-top: 10px; align-items: center; gap: 6px; }
+  #storageMsg.visible { display: flex; animation: fadeUp .25s ease; }
+
+  /* SUCCESS */
+  #successBanner { display: none; max-width: 1060px; margin: 0 auto; padding: 0 24px 24px; animation: fadeUp .4s ease; }
+  .success-inner { background: #ecfdf5; border: 1px solid #6ee7a8; border-radius: var(--radius-lg); padding: 20px 24px; display: flex; align-items: center; gap: 16px; }
+  .success-icon { width: 44px; height: 44px; border-radius: 50%; background: #d1fae5; display: flex; align-items: center; justify-content: center; color: #16a34a; font-size: 18px; flex-shrink: 0; }
+  .success-inner h3 { font-size: 15px; font-weight: 600; color: #14532d; margin-bottom: 3px; }
+  .success-inner p { font-size: 13.5px; color: #166534; }
+
+  /* TOAST */
+  #toast { position: fixed; bottom: 28px; right: 28px; background: var(--gray-900); color: #fff; font-size: 13.5px; padding: 12px 18px; border-radius: var(--radius-md); box-shadow: 0 8px 24px rgba(0,0,0,.18); display: none; align-items: center; gap: 10px; z-index: 999; animation: slideUp .3s ease; }
+  #toast.show { display: flex; }
+  #toast i { font-size: 14px; color: #4ade80; }
+
+  /* FOOTER */
+  footer { background: var(--gray-900); color: var(--gray-400); text-align: center; font-size: 12.5px; padding: 20px; }
+  footer i { color: #f87171; margin: 0 2px; }
+
+  /* ANIMATIONS */
+  @keyframes fadeDown { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spin { animation: spin .8s linear infinite; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="#" class="logo">
+      <div class="logo-icon"><i class="fa-solid fa-bowl-food"></i></div>
+      Feed<em>The</em>Need
+    </a>
+    <nav>
+      <a href="dashboard.html"><i class="fa-solid fa-gauge-high" style="margin-right:5px"></i>Dashboard</a>
+      <a href="volunteer.html"><i class="fa-solid fa-person-biking" style="margin-right:5px"></i>Volunteer</a>
+      <a href="donor.html" class="nav-cta"><i class="fa-solid fa-heart" style="margin-right:6px"></i>Donate food</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow"><i class="fa-solid fa-leaf"></i> Food Donation Portal</div>
+    <h1>Turn surplus food into someone's next meal</h1>
+    <p>Connect with NGOs and communities in your city. Your excess food makes a real difference.</p>
+    <div class="hero-stats">
+      <div class="hero-stat"><strong>2,400+</strong><span>Meals donated</span></div>
+      <div class="hero-stat"><strong>180+</strong><span>NGO partners</span></div>
+      <div class="hero-stat"><strong>34</strong><span>Cities served</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="steps-bar">
+  <div class="step active"><div class="step-circle">1</div><div class="step-label">Your details</div></div>
+  <div class="step-line"></div>
+  <div class="step active"><div class="step-circle">2</div><div class="step-label">Food info</div></div>
+  <div class="step-line"></div>
+  <div class="step active"><div class="step-circle">3</div><div class="step-label">Location &amp; photo</div></div>
+  <div class="step-line"></div>
+  <div class="step" id="step4"><div class="step-circle">4</div><div class="step-label">Submit</div></div>
+</div>
+
+<main>
+
+  <!-- Donor Info -->
+  <div class="card">
+    <div class="section-label">Step 1</div>
+    <div class="card-title">Donor information</div>
+    <div class="card-sub">Your details help the NGO coordinate pickup</div>
+    <div class="field">
+      <label><i class="fa-solid fa-user" style="margin-right:5px;opacity:.6"></i>Full name</label>
+      <input id="donorName" type="text" placeholder="e.g. Priya Sharma">
+    </div>
+    <div class="field">
+      <label><i class="fa-solid fa-phone" style="margin-right:5px;opacity:.6"></i>Phone number</label>
+      <input id="phone" type="tel" placeholder="+91 98765 43210">
+    </div>
+    <div class="field">
+      <label><i class="fa-solid fa-envelope" style="margin-right:5px;opacity:.6"></i>Email address</label>
+      <input id="email" type="email" placeholder="you@example.com">
+    </div>
+    <div class="field">
+      <label><i class="fa-solid fa-building" style="margin-right:5px;opacity:.6"></i>Organisation <span class="opt">(optional)</span></label>
+      <input id="org" type="text" placeholder="Restaurant, hotel, event organiser…">
+    </div>
+  </div>
+
+  <!-- Food Details -->
+  <div class="card">
+    <div class="section-label">Step 2</div>
+    <div class="card-title">Food details</div>
+    <div class="card-sub">Tell us what you're donating so we can match the right partner</div>
+    <div class="field">
+      <label><i class="fa-solid fa-utensils" style="margin-right:5px;opacity:.6"></i>Food name</label>
+      <input id="foodName" type="text" placeholder="e.g. Vegetable biryani">
+    </div>
+    <div class="grid-2">
+      <div class="field" style="margin-bottom:0">
+        <label><i class="fa-solid fa-tag" style="margin-right:5px;opacity:.6"></i>Category</label>
+        <select id="foodCat">
+          <option>Cooked food</option>
+          <option>Packed food</option>
+          <option>Bakery items</option>
+          <option>Vegetables &amp; fruit</option>
+          <option>Dairy products</option>
+          <option>Beverages</option>
+        </select>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label><i class="fa-solid fa-people-group" style="margin-right:5px;opacity:.6"></i>Servings</label>
+        <input id="quantity" type="number" placeholder="e.g. 50" min="1">
+      </div>
+    </div>
+    <div class="field" style="margin-top:14px">
+      <label><i class="fa-solid fa-note-sticky" style="margin-right:5px;opacity:.6"></i>Additional notes</label>
+      <textarea id="notes" rows="3" placeholder="Allergens, dietary restrictions, packaging details, best before time…"></textarea>
+    </div>
+  </div>
+
+  <!-- Pickup Location -->
+  <div class="card">
+    <div class="section-label">Step 3</div>
+    <div class="card-title">Pickup location</div>
+    <div class="card-sub">Where should the NGO collect from?</div>
+    <button id="locBtn" class="btn btn-green">
+      <i class="fa-solid fa-location-crosshairs"></i> Use my current location
+    </button>
+    <div class="loc-status">
+      <span class="loc-dot" id="locDot"></span>
+      <span id="locStatusText">No location selected yet</span>
+    </div>
+    <div id="map-placeholder">
+      <i class="fa-solid fa-map-pin"></i>
+      <span>Tap the button above to pin your location</span>
+    </div>
+    <div id="map"></div>
+  </div>
+
+  <!-- Right column stack -->
+  <div style="display:flex;flex-direction:column;gap:20px;">
+
+    <!-- Food photo -->
+    <div class="card">
+      <div class="section-label">Step 3 cont.</div>
+      <div class="card-title">Food photo</div>
+      <div class="card-sub">A photo helps NGOs confirm what's being donated</div>
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" id="foodImage" accept="image/*">
+        <i class="fa-solid fa-cloud-arrow-up"></i>
+        <div class="upload-label"><strong>Click to upload</strong> or drag &amp; drop</div>
+        <div class="upload-hint">PNG, JPG, WEBP up to 10 MB</div>
+      </div>
+      <img id="preview" alt="Food preview">
+    </div>
+
+    <!-- Remember name -->
+    <div class="card">
+      <div class="card-title"><i class="fa-solid fa-bookmark" style="color:var(--green-500);margin-right:7px"></i>Remember me</div>
+      <div class="card-sub">Your name is saved locally — persists after page refresh</div>
+      <input id="savedName" type="text" placeholder="Type your name…">
+      <div class="storage-row">
+        <button id="saveBtn" class="btn btn-green"><i class="fa-solid fa-floppy-disk"></i> Save name</button>
+        <button id="clearBtn" class="btn btn-outline"><i class="fa-solid fa-trash-can"></i> Clear</button>
+      </div>
+      <div id="storageMsg"><i class="fa-solid fa-circle-check"></i> <span id="storageMsgText">Name saved successfully</span></div>
+    </div>
+
+    <!-- Notifications -->
+    <div class="card">
+      <div class="card-title"><i class="fa-solid fa-bell" style="color:#3b82f6;margin-right:7px"></i>Pickup alerts</div>
+      <div class="card-sub">Get notified when an NGO accepts your donation</div>
+      <button id="notifyBtn" class="btn btn-blue"><i class="fa-solid fa-bell"></i> Enable notifications</button>
+    </div>
+
+  </div>
+
+  <!-- Canvas chart -->
+  <div class="card" style="grid-column:1/-1;">
+    <div class="card-title"><i class="fa-solid fa-chart-column" style="color:var(--green-500);margin-right:7px"></i>Impact dashboard</div>
+    <div class="card-sub">Weekly donation activity across cities</div>
+    <canvas id="impactCanvas" width="1012" height="240"></canvas>
+  </div>
+
+  <!-- Submit -->
+  <div class="card" style="grid-column:1/-1;background:linear-gradient(135deg,#1a4a31,#2e7d52);border-color:transparent;">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+      <div>
+        <p style="font-size:17px;font-weight:600;color:#fff;margin-bottom:5px;">Ready to make a difference?</p>
+        <p style="font-size:13px;color:rgba(255,255,255,.65);">An NGO partner will contact you within 2 hours of submission.</p>
+      </div>
+      <button id="submitBtn" class="btn" style="background:#fff;color:var(--green-700);font-size:15px;padding:13px 32px;font-weight:600;min-width:200px;flex-shrink:0;">
+        <i class="fa-solid fa-paper-plane"></i> <span id="submitLabel">Submit donation</span>
+      </button>
+    </div>
+  </div>
+
+</main>
+
+<!-- SUCCESS -->
+<div id="successBanner">
+  <div class="success-inner">
+    <div class="success-icon"><i class="fa-solid fa-circle-check"></i></div>
+    <div>
+      <h3>Donation submitted — thank you!</h3>
+      <p>A nearby NGO partner will reach out to schedule pickup. You'll receive a confirmation by email.</p>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast">
+  <i class="fa-solid fa-circle-check"></i>
+  <span id="toastMsg">Action complete</span>
+</div>
+
+<footer>
+  Made with <i class="fa-solid fa-heart"></i> by FeedTheNeed &nbsp;&middot;&nbsp; Reducing food waste, one donation at a time.
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+/* TOAST */
+function showToast(msg, duration) {
+  duration = duration || 3000;
+  var t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, duration);
+}
+
+/* LOCALSTORAGE */
+var savedNameInput = document.getElementById('savedName');
+savedNameInput.value = localStorage.getItem('donorName') || '';
+
+document.getElementById('saveBtn').onclick = function() {
+  var name = savedNameInput.value.trim();
+  if (!name) { showToast('Please enter a name first.'); return; }
+  localStorage.setItem('donorName', name);
+  document.getElementById('storageMsgText').textContent = '"' + name + '" saved — still here after refresh';
+  document.getElementById('storageMsg').classList.add('visible');
+  showToast('Name saved to your browser');
+};
+
+document.getElementById('clearBtn').onclick = function() {
+  localStorage.removeItem('donorName');
+  savedNameInput.value = '';
+  document.getElementById('storageMsg').classList.remove('visible');
+  showToast('Saved name cleared.');
+};
+
+/* FILE API */
+var uploadZone = document.getElementById('uploadZone');
+var foodImageInput = document.getElementById('foodImage');
+var preview = document.getElementById('preview');
+
+function handleFile(file) {
+  if (!file || !file.type.startsWith('image/')) { showToast('Please upload an image file.'); return; }
+  var reader = new FileReader();
+  reader.onload = function() {
+    preview.src = reader.result;
+    preview.style.display = 'block';
+    showToast('Photo uploaded successfully');
+  };
+  reader.readAsDataURL(file);
+}
+
+foodImageInput.addEventListener('change', function(e) { handleFile(e.target.files[0]); });
+uploadZone.addEventListener('dragover', function(e) { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+uploadZone.addEventListener('dragleave', function() { uploadZone.classList.remove('drag-over'); });
+uploadZone.addEventListener('drop', function(e) { e.preventDefault(); uploadZone.classList.remove('drag-over'); handleFile(e.dataTransfer.files[0]); });
+
+/* GEOLOCATION */
+document.getElementById('locBtn').onclick = function() {
+  var btn = this;
+  btn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Detecting…';
+  btn.disabled = true;
+
+  navigator.geolocation.getCurrentPosition(function(pos) {
+    var lat = pos.coords.latitude, lon = pos.coords.longitude;
+    document.getElementById('locDot').classList.add('active');
+    document.getElementById('locStatusText').textContent = 'Captured: ' + lat.toFixed(5) + ', ' + lon.toFixed(5);
+    document.getElementById('map-placeholder').style.display = 'none';
+    var mapEl = document.getElementById('map');
+    mapEl.style.display = 'block';
+    var map = L.map('map').setView([lat, lon], 15);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+    var icon = L.divIcon({ html: '<div style="background:#2e7d52;width:16px;height:16px;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3)"></div>', iconSize: [16,16], iconAnchor: [8,8], className: '' });
+    L.marker([lat, lon], { icon: icon }).addTo(map).bindPopup('<b>Pickup location</b>').openPopup();
+    btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Location pinned';
+    btn.disabled = false;
+    capturedLocation = lat.toFixed(5) + '° N, ' + lon.toFixed(5) + '° E';
+    showToast('Location captured successfully');
+  }, function() {
+    document.getElementById('locStatusText').textContent = 'Location access denied — please enable it in browser settings.';
+    btn.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i> Use my current location';
+    btn.disabled = false;
+    showToast('Could not access location.');
+  });
+};
+
+/* NOTIFICATIONS */
+document.getElementById('notifyBtn').onclick = function() {
+  var btn = this;
+  if (!('Notification' in window)) { showToast('Notifications not supported in this browser.'); return; }
+  Notification.requestPermission().then(function(perm) {
+    if (perm === 'granted') {
+      new Notification('FeedTheNeed', { body: 'Pickup alerts enabled! We will notify you when an NGO accepts your donation.' });
+      btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Alerts enabled';
+      btn.style.background = '#16a34a';
+      showToast('Notifications enabled');
+    } else {
+      showToast('Notification permission was denied.');
+    }
+  });
+};
+
+/* CANVAS CHART */
+(function() {
+  var canvas = document.getElementById('impactCanvas');
+  var ctx = canvas.getContext('2d');
+  var W = canvas.width, H = canvas.height;
+  var days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  var meals = [180,240,310,195,420,560,380];
+  var padL=52, padR=20, padT=24, padB=48;
+  var chartW=W-padL-padR, chartH=H-padT-padB;
+  var barW=(chartW/days.length)*0.45, maxMeals=600;
+
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle='#e2e6ea'; ctx.lineWidth=1;
+  for(var i=0;i<=4;i++){
+    var y=padT+(chartH/4)*i;
+    ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(W-padR,y); ctx.stroke();
+    ctx.fillStyle='#9da8b3'; ctx.font='11px DM Sans,sans-serif'; ctx.textAlign='right';
+    ctx.fillText(Math.round(maxMeals-(maxMeals/4)*i), padL-8, y+4);
+  }
+  days.forEach(function(day,i){
+    var x=padL+(chartW/days.length)*i+(chartW/days.length)*0.25;
+    var barH=(meals[i]/maxMeals)*chartH, y=padT+chartH-barH;
+    ctx.fillStyle = i===5 ? '#2e7d52' : '#7fc3a0';
+    ctx.beginPath();
+    ctx.roundRect(x,y,barW,barH,[5,5,0,0]);
+    ctx.fill();
+    ctx.fillStyle='#374151'; ctx.font='11px DM Sans,sans-serif'; ctx.textAlign='center';
+    ctx.fillText(meals[i], x+barW/2, y-6);
+    ctx.fillStyle='#6b7684';
+    ctx.fillText(day, x+barW/2, H-padB+18);
+  });
+  ctx.fillStyle='#2e7d52'; ctx.fillRect(padL,6,12,10);
+  ctx.fillStyle='#7fc3a0'; ctx.fillRect(padL+80,6,12,10);
+  ctx.fillStyle='#374151'; ctx.font='12px DM Sans,sans-serif'; ctx.textAlign='left';
+  ctx.fillText('Peak day',padL+16,15); ctx.fillText('Other days',padL+96,15);
+})();
+/* LOCATION STRING for dashboard */
+var capturedLocation = "Location not shared";
+/* SUBMIT */
+document.getElementById('submitBtn').onclick = function () {
+  // ── Validation ──
+  var name  = document.getElementById('donorName').value.trim();
+  var phone = document.getElementById('phone').value.trim();
+  var food  = document.getElementById('foodName').value.trim();
+ 
+  if (!name) { showToast('Please enter your full name.'); return; }
+  if (!phone) { showToast('Please enter a phone number.'); return; }
+  if (!food)  { showToast('Please enter the food name.'); return; }
+ 
+  var btn = this;
+  btn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> <span>Submitting…</span>';
+  btn.disabled  = true;
+ 
+  // ── Build donation object ──
+  var donation = {
+    id:          'ftn_' + Date.now(),
+    donorName:   name,
+    phone:       phone,
+    email:       document.getElementById('email').value.trim(),
+    org:         document.getElementById('org').value.trim(),
+    foodName:    food,
+    foodCat:     document.getElementById('foodCat').value,
+    quantity:    document.getElementById('quantity').value || 0,
+    notes:       document.getElementById('notes').value.trim(),
+    location:    capturedLocation,
+    status:      'pending',
+    submittedAt: new Date().toISOString(),
+    acceptedAt:  null,
+    volunteer:   null
+  };
+ 
+  // ── Save to localStorage ──
+  var existing = [];
+  try {
+    existing = JSON.parse(localStorage.getItem('ftn_donations') || '[]');
+  } catch (e) { existing = []; }
+  existing.push(donation);
+  localStorage.setItem('ftn_donations', JSON.stringify(existing));
+ 
+  // ── Simulate network delay, then show success ──
+  setTimeout(function () {
+    btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> <span>Submitted!</span>';
+ 
+    document.getElementById('successBanner').style.display = 'block';
+    document.getElementById('successBanner').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    document.getElementById('step4').classList.add('active');
+ 
+    showToast('Donation saved! NGO will contact you soon.', 5000);
+  }, 1200);
+};
+</script>
+</body>
+</html>
