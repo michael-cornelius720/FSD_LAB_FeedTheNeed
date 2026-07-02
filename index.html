@@ -51,8 +51,8 @@ type="audio/mpeg">
       <a href="#impact"   class="text-slate-600 font-medium text-sm hover:text-green-600">Impact</a>
       <a href="#about"    class="text-slate-600 font-medium text-sm hover:text-green-600">About</a>
       <a href="#contact"  class="text-slate-600 font-medium text-sm hover:text-green-600">Contact</a>
-      <a href="volunteer.html" class="text-slate-600 font-medium text-sm hover:text-green-600">Volunteer</a>
-      <a href="#contact" class="text-white font-semibold px-5 py-2 rounded-lg text-sm hover:opacity-90 transition-opacity" style="background:linear-gradient(135deg,#16a34a,#22c55e);">Donate Food</a>
+      <a href="login.html" class="text-slate-600 font-medium text-sm hover:text-green-600">Login</a>
+      <a href="login.html" class="text-white font-semibold px-5 py-2 rounded-lg text-sm hover:opacity-90 transition-opacity" style="background:linear-gradient(135deg,#16a34a,#22c55e);">Donate Food</a>
     </nav>
     <button id="ham-btn" onclick="toggleMenu()" class="md:hidden p-2 text-slate-600">
       <svg id="ico-open"  width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
@@ -68,8 +68,8 @@ type="audio/mpeg">
       <a href="#impact"   onclick="closeMenu()">Impact</a>
       <a href="#about"    onclick="closeMenu()">About</a>
       <a href="#contact"  onclick="closeMenu()">Contact</a>
-      <a href="volunteer.html"  onclick="closeMenu()">Volunteer</a>
-      <a href="#contact"  onclick="closeMenu()" class="bg-green-600 text-white text-center py-2.5 rounded-lg font-semibold">Donate Food</a>
+      <a href="login.html" onclick="closeMenu()">Login</a>
+      <a href="login.html"  onclick="closeMenu()" class="bg-green-600 text-white text-center py-2.5 rounded-lg font-semibold">Donate Food</a>
     </nav>
   </div>
 </header>
@@ -108,7 +108,7 @@ type="audio/mpeg">
         FeedTheNeed connects surplus food from restaurants, hotels, and households with NGOs and communities in need — reducing waste and fighting hunger.
       </p>
       <div class="flex flex-wrap gap-4 mt-8 justify-center lg:justify-start">
-        <a href="#contact" id="btn-donate-hero" class="text-white font-bold px-8 py-4 rounded-xl text-sm shadow-lg transition-all duration-200" style="background:linear-gradient(135deg,#16a34a,#22c55e);">
+        <a href="login.html" id="btn-donate-hero" class="text-white font-bold px-8 py-4 rounded-xl text-sm shadow-lg transition-all duration-200" style="background:linear-gradient(135deg,#16a34a,#22c55e);">
           Donate Food
         </a>
         <a href="#solution" class="border-2 border-white/40 text-white px-8 py-4 rounded-xl font-semibold text-sm transition-all duration-200 hover:bg-white/10">
@@ -541,13 +541,13 @@ style="background:linear-gradient(135deg,#f0fdf4 0%,#ecfdf5 100%);">
     </p>
 
     <div class="mt-8 flex flex-col sm:flex-row justify-center gap-4">
-      <button class="text-green-700 font-bold px-8 py-3.5 rounded-xl transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:shadow-green-900/50" onclick="playNotification()" style="background:linear-gradient(135deg,#ffffff,#f0fdf4);">
+      <a href="login.html" class="inline-block text-center text-green-700 font-bold px-8 py-3.5 rounded-xl transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:shadow-green-900/50" style="background:linear-gradient(135deg,#ffffff,#f0fdf4);">
         Donate Food
-      </button>
+      </a>
      
-      <button class="border-2 border-white/50 text-white font-semibold px-8 py-3.5 rounded-xl transition-all duration-200 hover:bg-white/10 hover:-translate-y-1">
+      <a href="login.html" class="inline-block text-center border-2 border-white/50 text-white font-semibold px-8 py-3.5 rounded-xl transition-all duration-200 hover:bg-white/10 hover:-translate-y-1">
         Become a Volunteer
-      </button>
+      </a>
     </div>
 
     <div class="mt-10 flex flex-wrap justify-center gap-6 text-green-200 text-sm">
@@ -596,10 +596,19 @@ style="background:linear-gradient(135deg,#f0fdf4 0%,#ecfdf5 100%);">
       </div>
       <div>
         <h4 class="font-bold text-slate-200 mb-4 text-sm uppercase tracking-wide">Follow Us</h4>
-        <ul class="space-y-2 text-sm">
-          <li><a href="https://www.linkedin.com/in/michael-pereira-347b8a34b/" class="text-slate-500 hover:text-green-400 transition-colors duration-200">LinkedIn</a></li>
-          <li><a href="https://github.com/michael-cornelius720" class="text-slate-500 hover:text-green-400 transition-colors duration-200">GitHub</a></li>
+        <ul class="space-y-2 text-sm mb-6 flex gap-4">
+          <li><a href="https://www.linkedin.com/in/michael-pereira-347b8a34b/" class="text-slate-500 hover:text-green-400 transition-colors duration-200 text-xl"><i class="fab fa-linkedin"></i></a></li>
+          <li><a href="https://github.com/michael-cornelius720" class="text-slate-500 hover:text-green-400 transition-colors duration-200 text-xl"><i class="fab fa-github"></i></a></li>
         </ul>
+        <h4 class="font-bold text-slate-200 mb-4 text-sm uppercase tracking-wide">Newsletter</h4>
+        <form id="newsletterForm" class="space-y-3">
+          <div>
+            <input type="email" id="emailInput" placeholder="Email address" class="w-full px-4 py-2 rounded-lg bg-slate-800 text-white border border-slate-700 focus:outline-none transition-colors duration-300" required>
+            <p id="emailFeedback" class="text-xs mt-1 text-slate-400">0 characters</p>
+          </div>
+          <button type="submit" id="subscribeBtn" class="w-full bg-green-600 text-white font-semibold py-2 rounded-lg transition-all duration-300">Subscribe</button>
+        </form>
+        <p id="formSuccess" class="text-green-400 text-sm mt-2 hidden">Subscribed successfully!</p>
       </div>
     </div>
     <div class="border-t border-slate-800 pt-6 flex flex-col md:flex-row justify-between items-center gap-2 text-slate-600 text-sm">
@@ -678,6 +687,84 @@ setTimeout(()=>{
 
 
 }
+
+// --- EXERCISE 3: JS EVENT HANDLING DEMONSTRATION ---
+
+// Event 1: input - Dynamic form validation / live feedback
+const emailInput = document.getElementById('emailInput');
+const emailFeedback = document.getElementById('emailFeedback');
+if (emailInput) {
+  emailInput.addEventListener('input', function(e) {
+    const len = e.target.value.length;
+    emailFeedback.innerText = len + ' characters';
+    if (len > 0 && !e.target.value.includes('@')) {
+      emailFeedback.classList.add('text-red-400');
+      emailFeedback.classList.remove('text-slate-400', 'text-green-400');
+      emailFeedback.innerText += ' - Missing @';
+    } else if (e.target.value.includes('@')) {
+      emailFeedback.classList.add('text-green-400');
+      emailFeedback.classList.remove('text-slate-400', 'text-red-400');
+    } else {
+      emailFeedback.classList.add('text-slate-400');
+      emailFeedback.classList.remove('text-red-400', 'text-green-400');
+    }
+  });
+
+  // Event 2: focus - Highlight form fields when selected
+  emailInput.addEventListener('focus', function() {
+    this.classList.remove('border-slate-700');
+    this.classList.add('border-green-500');
+  });
+
+  // Event 3: blur - Remove highlight when focus is lost
+  emailInput.addEventListener('blur', function() {
+    this.classList.add('border-slate-700');
+    this.classList.remove('border-green-500');
+  });
+}
+
+// Event 4: submit - Form validation before submission
+const newsletterForm = document.getElementById('newsletterForm');
+if (newsletterForm) {
+  newsletterForm.addEventListener('submit', function(e) {
+    e.preventDefault(); // Prevent actual submission
+    document.getElementById('formSuccess').classList.remove('hidden');
+    document.getElementById('subscribeBtn').innerText = 'Done!';
+    document.getElementById('subscribeBtn').classList.replace('bg-green-600', 'bg-slate-600');
+    
+    // reset form after 3 seconds
+    setTimeout(() => {
+      document.getElementById('formSuccess').classList.add('hidden');
+      document.getElementById('subscribeBtn').innerText = 'Subscribe';
+      document.getElementById('subscribeBtn').classList.replace('bg-slate-600', 'bg-green-600');
+      newsletterForm.reset();
+      emailFeedback.innerText = '0 characters';
+      emailFeedback.classList.add('text-slate-400');
+      emailFeedback.classList.remove('text-green-400', 'text-red-400');
+    }, 3000);
+  });
+}
+
+// Event 5 & 6: mouseover & mouseout - Interactive UI element
+const subscribeBtn = document.getElementById('subscribeBtn');
+if (subscribeBtn) {
+  subscribeBtn.addEventListener('mouseover', function() {
+    this.style.transform = 'scale(1.05)';
+  });
+  subscribeBtn.addEventListener('mouseout', function() {
+    this.style.transform = 'scale(1)';
+  });
+}
+
+// Event 7: dblclick - Double click on logo to change its appearance
+const heroLogo = document.querySelector('header img');
+if (heroLogo) {
+  heroLogo.addEventListener('dblclick', function() {
+    this.classList.toggle('rotate-180');
+    this.style.transition = 'transform 0.5s ease';
+  });
+}
+// ---------------------------------------------------
 </script>
 
 </body>

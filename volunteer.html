@@ -1,497 +1,86 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FeedTheNeed — Volunteer Portal</title>
+<title>Volunteer Dashboard — FeedTheNeed</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: { extend: { fontFamily: { sans: ['DM Sans', 'sans-serif'], serif: ['Playfair Display', 'serif'] } } }
+  }
+</script>
 <style>
-/* ===================== RESET & TOKENS ===================== */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-:root {
-  /* Brand */
-  --green-50:  #edf7f0;
-  --green-100: #c6e9cf;
-  --green-400: #4ade80;
-  --green-500: #2e7d52;
-  --green-600: #246342;
-  --green-700: #1a4a31;
-
-  /* Neutrals */
-  --bg:        #f0f4f1;
-  --surface:   #ffffff;
-  --border:    #e2e6ea;
-  --muted:     #f0f2f4;
-  --text-1:    #111827;
-  --text-2:    #374151;
-  --text-3:    #6b7684;
-  --text-4:    #9da8b3;
-
-  /* Semantic */
-  --blue:      #3b82f6;
-  --blue-dark: #2563eb;
-  --amber:     #f59e0b;
-  --red:       #ef4444;
-  --teal:      #0d9488;
-
-  /* Radius / shadow */
-  --r-sm: 8px;
-  --r-md: 12px;
-  --r-lg: 16px;
-  --r-xl: 20px;
-  --sh-sm: 0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
-  --sh-md: 0 4px 12px rgba(0,0,0,.08),0 2px 4px rgba(0,0,0,.04);
-  --sh-lg: 0 8px 24px rgba(0,0,0,.10),0 4px 8px rgba(0,0,0,.04);
-  --t: .18s ease;
-}
-
-/* ========= DARK MODE ========= */
-[data-theme="dark"] {
-  --bg:      #0f1a13;
-  --surface: #1a2b20;
-  --border:  #2d3f33;
-  --muted:   #1f2f25;
-  --text-1:  #f0fdf4;
-  --text-2:  #d1fae5;
-  --text-3:  #86efac;
-  --text-4:  #4ade80;
-  --sh-sm:   0 1px 3px rgba(0,0,0,.3);
-  --sh-md:   0 4px 12px rgba(0,0,0,.35);
-  --sh-lg:   0 8px 24px rgba(0,0,0,.4);
-}
-
-body {
-  font-family: 'DM Sans', sans-serif;
-  background: var(--bg);
-  color: var(--text-1);
-  font-size: 14px;
-  line-height: 1.6;
-  min-height: 100vh;
-  transition: background .3s ease, color .3s ease;
-}
-
-/* ===================== HEADER ===================== */
-header {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: 0;
-  z-index: 200;
-  box-shadow: var(--sh-sm);
-  transition: background .3s, border-color .3s;
-}
-.header-inner {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 24px;
-  height: 62px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-.logo {
-  display: flex; align-items: center; gap: 10px;
-  text-decoration: none; font-weight: 700; font-size: 17px;
-  color: var(--text-1); letter-spacing: -.3px; flex-shrink: 0;
-}
-.logo-icon {
-  width: 36px; height: 36px;
-  background: var(--teal);
-  border-radius: var(--r-sm);
-  display: flex; align-items: center; justify-content: center;
-  color: #fff; font-size: 15px;
-}
-.logo em { color: var(--teal); font-style: normal; }
-
-nav { display: flex; align-items: center; gap: 4px; }
-nav a {
-  color: var(--text-3); text-decoration: none; font-size: 13.5px;
-  padding: 6px 12px; border-radius: var(--r-sm);
-  transition: color var(--t), background var(--t); font-weight: 500;
-}
-nav a:hover { color: var(--text-1); background: var(--muted); }
-nav a.active { color: var(--teal); background: #f0fdfa; }
-[data-theme="dark"] nav a.active { background: #134e4a; color: #5eead4; }
-
-.header-actions { display: flex; align-items: center; gap: 10px; }
-
-/* Dark mode toggle */
-.dark-btn {
-  width: 38px; height: 38px;
-  border-radius: 50%;
-  border: 1.5px solid var(--border);
-  background: var(--surface);
-  color: var(--text-3);
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 14px;
-  transition: background var(--t), color var(--t), border-color var(--t);
-}
-.dark-btn:hover { background: var(--muted); color: var(--text-1); }
-
-/* Volunteer badge */
-.vol-badge {
-  display: flex; align-items: center; gap: 8px;
-  background: var(--muted);
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-  padding: 5px 12px 5px 5px;
-  font-size: 12.5px; font-weight: 500;
-  color: var(--text-2);
-}
-.vol-avatar {
-  width: 28px; height: 28px;
-  border-radius: 50%;
-  background: var(--teal);
-  color: #fff;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: 600;
-}
-
-/* ===================== HERO STRIP ===================== */
-.hero-strip {
-  background: linear-gradient(130deg, #0d9488 0%, #0f766e 55%, #115e59 100%);
-  padding: 36px 24px 40px;
-  position: relative; overflow: hidden;
-}
-.hero-strip::before {
-  content: '';
-  position: absolute; top: -100px; right: -60px;
-  width: 360px; height: 360px; border-radius: 50%;
-  background: rgba(255,255,255,.04); pointer-events: none;
-}
-.hero-inner {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 24px;
-  position: relative;
-}
-.hero-text h1 {
-  font-size: clamp(20px, 3vw, 28px);
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: -.4px;
-  margin-bottom: 5px;
-}
-.hero-text p { color: rgba(255,255,255,.65); font-size: 14px; }
-
-/* ===================== VOLUNTEER SELECTOR ===================== */
-.vol-selector-wrapper {
-  max-width: 1200px;
-  margin: -25px auto 20px;
-  padding: 0 24px;
-  position: relative;
-  z-index: 10;
-}
-.vol-selector {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r-md);
-  padding: 20px;
-  box-shadow: var(--sh-md);
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  flex-wrap: wrap;
-}
-.vol-selector select {
-  flex: 1;
-  min-width: 250px;
-  border: 1.5px solid var(--border);
-  border-radius: var(--r-sm);
-  padding: 10px 14px;
-  font-size: 14px;
-  font-family: inherit;
-  background: var(--surface);
-  color: var(--text-1);
-  outline: none;
-  cursor: pointer;
-}
-.vol-selector select:focus { border-color: var(--teal); }
-
-/* ===================== MAIN GRID ===================== */
-main {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px 24px 60px;
-}
-.section-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-.section-heading h2 {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text-1);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.cards-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 20px;
-}
-
-/* Task Card */
-.task-card {
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-left: 4px solid var(--teal);
-  border-radius: var(--r-lg);
-  padding: 20px;
-  box-shadow: var(--sh-sm);
-  transition: box-shadow var(--t), transform var(--t);
-  animation: fadeUp .35s ease both;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-.task-card:hover {
-  box-shadow: var(--sh-md);
-  transform: translateY(-2px);
-}
-
-.card-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 10px;
-}
-.donor-info { display: flex; align-items: center; gap: 10px; }
-.donor-avatar {
-  width: 40px; height: 40px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--teal), #115e59);
-  color: #fff;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 15px; font-weight: 700;
-}
-.donor-name {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text-1);
-  margin-bottom: 2px;
-}
-.donor-phone {
-  font-size: 12.5px;
-  color: var(--text-3);
-  display: flex; align-items: center; gap: 4px;
-}
-
-.status-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 11.5px;
-  font-weight: 600;
-  padding: 4px 10px;
-  border-radius: 100px;
-  background: #f0fdfa;
-  color: #0f766e;
-  border: 1px solid #5eead4;
-}
-[data-theme="dark"] .status-badge {
-  background: #134e4a;
-  color: #5eead4;
-  border-color: #0f766e;
-}
-.status-badge.completed {
-  background: #ecfdf5;
-  color: #14532d;
-  border: 1px solid #6ee7a8;
-}
-
-.food-details {
-  background: var(--muted);
-  border-radius: var(--r-md);
-  padding: 12px 14px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px 14px;
-}
-.detail-label {
-  font-size: 10.5px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: .6px;
-  color: var(--text-4);
-  margin-bottom: 2px;
-}
-.detail-value {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-2);
-}
-
-.loc-box {
-  background: #f0fdfa;
-  border: 1px solid #ccfbf1;
-  padding: 12px;
-  border-radius: var(--r-md);
-  display: flex;
-  gap: 10px;
-}
-[data-theme="dark"] .loc-box {
-  background: #134e4a;
-  border-color: #0f766e;
-}
-.loc-icon {
-  color: var(--teal);
-  font-size: 18px;
-  margin-top: 2px;
-}
-.loc-text strong {
-  display: block;
-  font-size: 13px;
-  color: var(--text-1);
-  margin-bottom: 2px;
-}
-.loc-text p {
-  font-size: 12.5px;
-  color: var(--text-3);
-  line-height: 1.4;
-}
-
-.notes-row {
-  font-size: 12.5px;
-  color: var(--text-3);
-  line-height: 1.5;
-  padding: 8px 12px;
-  background: var(--muted);
-  border-radius: var(--r-sm);
-  border-left: 3px solid var(--amber);
-}
-
-.card-footer {
-  margin-top: 5px;
-  display: flex;
-  gap: 10px;
-}
-.btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-  padding: 8px 16px;
-  border-radius: var(--r-sm);
-  font-family: inherit; font-size: 13px; font-weight: 500;
-  cursor: pointer; border: none;
-  transition: background var(--t), transform .1s, box-shadow var(--t), color var(--t);
-  flex: 1;
-}
-.btn:active { transform: scale(0.975); }
-.btn-teal { background: var(--teal); color: #fff; }
-.btn-teal:hover { background: #0f766e; box-shadow: 0 4px 12px rgba(13,148,136,.25); }
-.btn-outline { background: transparent; color: var(--text-2); border: 1.5px solid var(--border); }
-.btn-outline:hover { background: var(--muted); }
-.btn-green { background: var(--green-500); color: #fff; }
-
-.empty-state {
-  grid-column: 1 / -1;
-  text-align: center;
-  padding: 60px 20px;
-  color: var(--text-4);
-}
-.empty-state i { font-size: 48px; display: block; margin-bottom: 14px; opacity: .35; }
-.empty-state h3 { font-size: 15px; font-weight: 600; color: var(--text-3); margin-bottom: 6px; }
-
-/* ===================== TOAST ===================== */
-#toast {
-  position: fixed; bottom: 24px; right: 24px;
-  background: var(--teal);
-  color: #fff;
-  font-size: 13.5px;
-  padding: 12px 18px;
-  border-radius: var(--r-md);
-  box-shadow: var(--sh-lg);
-  display: none;
-  align-items: center;
-  gap: 10px;
-  z-index: 999;
-  animation: slideUp .3s ease;
-}
-#toast.show { display: flex; }
-
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-@media (max-width: 640px) {
-  .hero-inner { flex-direction: column; align-items: flex-start; }
-  .vol-selector { flex-direction: column; align-items: stretch; }
-  .card-footer { flex-direction: column; }
-}
+  body { font-family: "DM Sans", sans-serif; background-color: #f8fafc; }
+  #toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: #16a34a; color: white; padding: 12px 24px; border-radius: 8px; font-weight: 600; display: flex; align-items: center; gap: 10px; box-shadow: 0 10px 25px rgba(22,163,74,0.3); transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 1000; }
+  #toast.show { bottom: 30px; }
 </style>
 </head>
-<body>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col">
 
-<header>
-  <div class="header-inner">
-    <a href="index.html" class="logo">
-      <div class="logo-icon"><i class="fa-solid fa-hands-holding-child"></i></div>
-      Feed<em>The</em>Need
-    </a>
-    <nav>
-      <a href="donor.html">Donate</a>
-      <a href="dashboard.html">Dashboard</a>
-      <a href="volunteer.html" class="active">Volunteer</a>
-    </nav>
-    <div class="header-actions">
-      <button class="dark-btn" id="darkToggle">
-        <i class="fa-solid fa-moon" id="darkIcon"></i>
-      </button>
-      <div class="vol-badge">
-        <div class="vol-avatar" id="headerAvatar">V</div>
-        <span id="headerName">Volunteer</span>
+<!-- HEADER -->
+<header class="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm">
+  <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+    <a href="index.html#home" class="flex items-center gap-3">
+      <img src="assets/images/logo.png" alt="FeedTheNeed Logo" class="w-12 h-11 object-contain drop-shadow-sm">
+      <div>
+        <p class="text-lg font-black text-slate-900 leading-none" style="font-family:'Playfair Display',serif;">FeedTheNeed</p>
+        <p class="text-green-600 text-[10px] font-bold tracking-wider uppercase">Volunteer Portal</p>
       </div>
+    </a>
+    <div class="flex items-center gap-4">
+      <div class="hidden sm:flex items-center gap-3 bg-slate-50 border border-slate-200 py-1.5 px-3 rounded-full">
+        <div class="w-8 h-8 rounded-full bg-green-600 text-white font-bold flex items-center justify-center text-sm shadow-inner" id="headerAvatar">V</div>
+        <span class="text-sm font-semibold text-slate-700" id="headerName">Loading...</span>
+      </div>
+      <a href="/login.html" onclick="localStorage.removeItem('ftn_username');" class="text-slate-500 hover:text-red-500 transition-colors" title="Logout">
+        <i class="fa-solid fa-right-from-bracket text-lg"></i>
+      </a>
     </div>
   </div>
 </header>
 
-<section class="hero-strip">
-  <div class="hero-inner">
-    <div class="hero-text">
-      <h1><i class="fa-solid fa-route" style="margin-right:10px;opacity:.85"></i>Volunteer Delivery Portal</h1>
-      <p>View your assigned pickups, get donor details, and complete deliveries.</p>
+<!-- PROFILE SECTION -->
+<section class="bg-white border-b border-slate-200 pb-10 pt-10">
+  <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center gap-6">
+    <div class="w-24 h-24 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-white text-3xl font-black shadow-lg shadow-green-500/30" id="profileInitials">
+      V
+    </div>
+    <div class="text-center md:text-left flex-1">
+      <div class="inline-flex items-center gap-1.5 bg-green-100 text-green-700 px-3 py-1 text-[11px] font-bold uppercase tracking-widest rounded-full mb-2">
+        <i class="fa-solid fa-truck-fast"></i> Delivery Volunteer
+      </div>
+      <h1 class="text-3xl md:text-4xl font-black text-slate-900 tracking-tight" style="font-family:'Playfair Display',serif;">
+        Welcome, <span id="welcomeName">Hero</span>!
+      </h1>
+      <p class="text-slate-500 mt-2 text-sm max-w-lg">Thank you for being on the frontlines of our mission. Check your assigned deliveries below and help us bridge the gap between surplus and scarcity.</p>
+    </div>
+    <div class="grid grid-cols-2 gap-4 bg-slate-50 rounded-xl p-4 border border-slate-100 min-w-[240px]">
+      <div class="text-center">
+        <div class="text-2xl font-black text-slate-800" id="statCompleted">0</div>
+        <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Completed</div>
+      </div>
+      <div class="text-center border-l border-slate-200">
+        <div class="text-2xl font-black text-green-600" id="statPending">0</div>
+        <div class="text-[11px] font-bold text-green-600/70 uppercase tracking-wider">Pending</div>
+      </div>
     </div>
   </div>
 </section>
 
-<div class="vol-selector-wrapper">
-  <div class="vol-selector">
-    <div style="font-weight:600; color:var(--text-1)">Select your profile:</div>
-    <select id="volunteerSelect">
-      <option value="">— Choose a volunteer —</option>
-      <!-- Populated by JS -->
-    </select>
+<!-- MAIN TASKS -->
+<main class="max-w-6xl mx-auto px-6 py-12 flex-grow">
+  <div class="mb-8 flex items-center justify-between border-b border-slate-200 pb-4">
+    <h2 class="text-2xl font-black text-slate-900" style="font-family:'Playfair Display',serif;">
+      <i class="fa-solid fa-list-check text-green-600 mr-2"></i> My Deliveries
+    </h2>
   </div>
-</div>
-
-<main>
-  <section>
-    <div class="section-heading">
-      <h2><i class="fa-solid fa-list-check" style="color:var(--teal)"></i> Your Assigned Pickups</h2>
-    </div>
-    <div class="cards-grid" id="tasksGrid">
-      <!-- Cards injected by JS -->
-    </div>
-  </section>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="tasksGrid">
+    <!-- Cards injected by JS -->
+  </div>
 </main>
 
 <div id="toast">
@@ -500,16 +89,29 @@ main {
 </div>
 
 <script>
-const VOLUNTEERS = [
-  { name: "Arjun Mehta",    role: "Field Coordinator", id: "AM" },
-  { name: "Kavya Reddy",    role: "Pickup Driver",     id: "KR" },
-  { name: "Deepak Nair",    role: "Logistics Lead",    id: "DN" },
-  { name: "Sneha Pillai",   role: "Community Worker",  id: "SP" },
-  { name: "Rahul Gupta",    role: "Pickup Driver",     id: "RG" },
-];
+const urlParams = new URLSearchParams(window.location.search);
+const urlUser = urlParams.get('user');
+if (urlUser) {
+  localStorage.setItem('ftn_username', urlUser);
+  // Clean up URL
+  window.history.replaceState({}, document.title, window.location.pathname);
+}
+
+let currentUser = localStorage.getItem('ftn_username');
+if (!currentUser) {
+  window.location.href = '/login.html';
+}
+
+// Ensure the first letter is capitalized
+const displayName = currentUser.charAt(0).toUpperCase() + currentUser.slice(1);
+const initials = displayName.substring(0, 2).toUpperCase();
+
+document.getElementById('headerName').textContent = displayName;
+document.getElementById('welcomeName').textContent = displayName;
+document.getElementById('headerAvatar').textContent = initials;
+document.getElementById('profileInitials').textContent = initials;
 
 let donations = [];
-let currentVolId = "";
 
 function loadDonations() {
   try {
@@ -524,129 +126,87 @@ function saveDonations() {
   localStorage.setItem("ftn_donations", JSON.stringify(donations));
 }
 
-function initSelectors() {
-  const sel = document.getElementById("volunteerSelect");
-  VOLUNTEERS.forEach(v => {
-    const opt = document.createElement("option");
-    opt.value = v.id;
-    opt.textContent = `${v.name} (${v.role})`;
-    sel.appendChild(opt);
-  });
-
-  const savedVol = localStorage.getItem("ftn_active_vol");
-  if (savedVol) {
-    sel.value = savedVol;
-    currentVolId = savedVol;
-    updateHeader();
-  }
-
-  sel.addEventListener("change", function() {
-    currentVolId = this.value;
-    localStorage.setItem("ftn_active_vol", currentVolId);
-    updateHeader();
-    renderTasks();
-  });
-}
-
-function updateHeader() {
-  if (!currentVolId) {
-    document.getElementById("headerName").textContent = "Volunteer";
-    document.getElementById("headerAvatar").textContent = "V";
-    return;
-  }
-  const vol = VOLUNTEERS.find(v => v.id === currentVolId);
-  document.getElementById("headerName").textContent = vol.name;
-  document.getElementById("headerAvatar").textContent = currentVolId;
-}
-
-function initials(name) {
-  return name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
-}
-
-function escapeHtml(str) {
-  if (!str) return "";
-  return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
 function renderTasks() {
   const grid = document.getElementById("tasksGrid");
   
-  if (!currentVolId) {
-    grid.innerHTML = `
-      <div class="empty-state">
-        <i class="fa-solid fa-user-check"></i>
-        <h3>Select your profile</h3>
-        <p>Please select your volunteer profile from the dropdown above to view your tasks.</p>
-      </div>`;
-    return;
-  }
+  // Filter where volunteer id matches the username
+  const myTasks = donations.filter(d => d.volunteer && d.volunteer.id === currentUser);
+  
+  const completedCount = myTasks.filter(d => d.status === 'completed').length;
+  const pendingCount = myTasks.filter(d => d.status !== 'completed').length;
+  
+  document.getElementById('statCompleted').textContent = completedCount;
+  document.getElementById('statPending').textContent = pendingCount;
 
-  const tasks = donations.filter(d => d.volunteer && d.volunteer.id === currentVolId);
-
-  if (tasks.length === 0) {
+  if (myTasks.length === 0) {
     grid.innerHTML = `
-      <div class="empty-state">
-        <i class="fa-solid fa-mug-hot"></i>
-        <h3>No tasks assigned</h3>
-        <p>You currently have no pending deliveries. Take a break!</p>
+      <div class="col-span-full flex flex-col items-center justify-center p-12 bg-white rounded-2xl border border-dashed border-slate-300 text-center">
+        <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center text-slate-300 text-3xl mb-4">
+          <i class="fa-solid fa-mug-hot"></i>
+        </div>
+        <h3 class="text-lg font-bold text-slate-700">No active assignments</h3>
+        <p class="text-slate-500 mt-2 max-w-md">You currently have no deliveries assigned to you. When the Admin assigns you a task, it will appear here.</p>
       </div>`;
     return;
   }
 
   grid.innerHTML = "";
-  tasks.forEach((d, idx) => {
+  
+  // Sort tasks: pending first
+  myTasks.sort((a, b) => {
+    if (a.status === 'completed' && b.status !== 'completed') return 1;
+    if (a.status !== 'completed' && b.status === 'completed') return -1;
+    return new Date(b.submittedAt) - new Date(a.submittedAt);
+  });
+
+  myTasks.forEach((d) => {
     const isCompleted = d.status === "completed";
     const card = document.createElement("div");
-    card.className = "task-card";
-    card.style.animationDelay = (idx * 0.05) + "s";
-    if (isCompleted) card.style.opacity = "0.7";
+    card.className = "bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-all flex flex-col relative h-full";
+    if (isCompleted) card.classList.add('opacity-75', 'bg-slate-50');
 
     card.innerHTML = `
-      <div class="card-header">
-        <div class="donor-info">
-          <div class="donor-avatar">${initials(d.donorName)}</div>
-          <div>
-            <div class="donor-name">${escapeHtml(d.donorName)}</div>
-            <div class="donor-phone"><i class="fa-solid fa-phone"></i> <a href="tel:${escapeHtml(d.phone)}" style="color:inherit;text-decoration:none">${escapeHtml(d.phone)}</a></div>
-          </div>
+      <div class="flex justify-between items-start mb-4 border-b border-slate-100 pb-4">
+        <div>
+          <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Donor</div>
+          <div class="font-bold text-slate-800 text-sm">${d.donorName || 'Unknown Donor'}</div>
+          <a href="tel:${d.phone}" class="text-xs text-green-600 font-medium hover:underline flex items-center gap-1 mt-1">
+            <i class="fa-solid fa-phone"></i> ${d.phone}
+          </a>
         </div>
         ${isCompleted 
-          ? `<span class="status-badge completed"><i class="fa-solid fa-check-double"></i> Delivered</span>`
-          : `<span class="status-badge"><i class="fa-solid fa-truck-fast"></i> Action Required</span>`
+          ? '<span class="bg-green-50 text-green-700 border border-green-200 px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-check-double"></i> Delivered</span>'
+          : '<span class="bg-orange-50 text-orange-700 border border-orange-200 px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-truck-fast"></i> Action Required</span>'
         }
       </div>
 
-      <div class="loc-box">
-        <i class="fa-solid fa-location-dot loc-icon"></i>
-        <div class="loc-text">
-          <strong>Pickup Location</strong>
-          <p>${escapeHtml(d.location)}</p>
-          <a href="https://maps.google.com/?q=${encodeURIComponent(d.location)}" target="_blank" style="font-size:12px;color:var(--teal);text-decoration:none;display:inline-block;margin-top:4px;font-weight:500;">
-            <i class="fa-solid fa-map"></i> Open in Maps
-          </a>
+      <div class="flex-grow">
+        <div class="flex gap-3 mb-5">
+          <div class="mt-0.5 text-slate-300 text-lg"><i class="fa-solid fa-location-dot"></i></div>
+          <div>
+            <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Pickup Location</div>
+            <p class="text-sm font-medium text-slate-700 leading-tight">${d.location || 'Location provided'}</p>
+            ${d.location ? `<a href="https://maps.google.com/?q=${encodeURIComponent(d.location)}" target="_blank" class="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-700 mt-2"><i class="fa-solid fa-map"></i> Open in Maps</a>` : ''}
+          </div>
         </div>
-      </div>
 
-      <div class="food-details">
-        <div class="detail-item">
-          <div class="detail-label">Food Item</div>
-          <div class="detail-value">${escapeHtml(d.foodName)}</div>
+        <div class="grid grid-cols-2 gap-3 bg-slate-50/50 rounded-lg p-3 mb-4 border border-slate-100">
+          <div>
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Food Item</div>
+            <div class="text-sm font-bold text-slate-800">${d.foodName || 'Food'}</div>
+          </div>
+          <div>
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Quantity</div>
+            <div class="text-sm font-bold text-slate-800">${d.quantity} servings</div>
+          </div>
         </div>
-        <div class="detail-item">
-          <div class="detail-label">Quantity</div>
-          <div class="detail-value">${d.quantity} servings</div>
-        </div>
+        
+        ${d.notes ? `<div class="text-xs text-slate-600 bg-amber-50 border border-amber-100 p-3 rounded-lg flex gap-2"><i class="fa-solid fa-circle-info text-amber-500 mt-0.5"></i> <div>${d.notes}</div></div>` : ''}
       </div>
-
-      ${d.notes ? `<div class="notes-row"><i class="fa-solid fa-circle-info" style="margin-right:6px"></i>${escapeHtml(d.notes)}</div>` : ""}
 
       ${!isCompleted ? `
-      <div class="card-footer">
-        <button class="btn btn-teal complete-btn" data-id="${d.id}">
+      <div class="mt-5 pt-4 border-t border-slate-100">
+        <button class="w-full bg-slate-900 hover:bg-black text-white font-bold py-3 px-4 rounded-xl transition-transform active:scale-95 flex items-center justify-center gap-2 complete-btn shadow-md shadow-slate-900/20" data-id="${d.id}">
           <i class="fa-solid fa-check"></i> Mark as Delivered
         </button>
       </div>` : ''}
@@ -657,9 +217,8 @@ function renderTasks() {
 
   document.querySelectorAll(".complete-btn").forEach(btn => {
     btn.addEventListener("click", function() {
-      const id = this.dataset.id;
-      if(confirm("Confirm that you have picked up and delivered this donation?")) {
-        markCompleted(id);
+      if(confirm("Confirm that you have delivered this donation?")) {
+        markCompleted(this.dataset.id);
       }
     });
   });
@@ -683,26 +242,9 @@ function showToast(msg) {
   toast._timer = setTimeout(() => toast.classList.remove("show"), 3000);
 }
 
-function applyTheme(theme) {
-  document.documentElement.setAttribute("data-theme", theme);
-  document.getElementById("darkIcon").className =
-    theme === "dark" ? "fa-solid fa-sun" : "fa-solid fa-moon";
-  localStorage.setItem("ftn_theme", theme);
-}
-
-document.getElementById("darkToggle").addEventListener("click", () => {
-  const current = document.documentElement.getAttribute("data-theme") || "light";
-  applyTheme(current === "dark" ? "light" : "dark");
-});
-
-(function init() {
-  const savedTheme = localStorage.getItem("ftn_theme") || "light";
-  applyTheme(savedTheme);
-
-  loadDonations();
-  initSelectors();
-  renderTasks();
-})();
+// Init
+loadDonations();
+renderTasks();
 </script>
 </body>
 </html>

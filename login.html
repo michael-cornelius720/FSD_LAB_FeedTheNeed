@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login / Register — FeedTheNeed</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+    <script>
+        function toggleForm(formType) {
+            if (formType === 'login') {
+                document.getElementById('login-form').classList.remove('hidden');
+                document.getElementById('register-form').classList.add('hidden');
+                document.getElementById('tab-login').classList.add('border-green-600', 'text-green-600');
+                document.getElementById('tab-login').classList.remove('border-transparent', 'text-slate-500');
+                document.getElementById('tab-register').classList.remove('border-green-600', 'text-green-600');
+                document.getElementById('tab-register').classList.add('border-transparent', 'text-slate-500');
+            } else {
+                document.getElementById('login-form').classList.add('hidden');
+                document.getElementById('register-form').classList.remove('hidden');
+                document.getElementById('tab-register').classList.add('border-green-600', 'text-green-600');
+                document.getElementById('tab-register').classList.remove('border-transparent', 'text-slate-500');
+                document.getElementById('tab-login').classList.remove('border-green-600', 'text-green-600');
+                document.getElementById('tab-login').classList.add('border-transparent', 'text-slate-500');
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 flex items-center justify-center min-h-screen py-12" style="font-family:'DM Sans',sans-serif;">
+    <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
+        <div class="text-center mb-6">
+            <h1 class="text-3xl font-black text-slate-900 mb-2" style="font-family:'Playfair Display',serif;">Welcome</h1>
+            <p class="text-slate-600">Login or create an account.</p>
+        </div>
+
+        <div class="flex border-b border-slate-200 mb-6">
+            <button id="tab-login" onclick="toggleForm('login')" class="flex-1 py-2 text-center font-medium border-b-2 border-green-600 text-green-600 transition-colors">Login</button>
+            <button id="tab-register" onclick="toggleForm('register')" class="flex-1 py-2 text-center font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700 transition-colors">Register</button>
+        </div>
+
+        <!-- LOGIN FORM -->
+        <form id="login-form" action="/login" method="POST" class="space-y-5">
+            <div>
+                <label for="login-username" class="block text-sm font-medium text-slate-700 mb-1">Username</label>
+                <input type="text" id="login-username" name="username" required 
+                    class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-green-600 outline-none transition-colors">
+            </div>
+            <div>
+                <label for="login-password" class="block text-sm font-medium text-slate-700 mb-1">Password</label>
+                <input type="password" id="login-password" name="password" required 
+                    class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-green-600 outline-none transition-colors">
+            </div>
+            <button type="submit" 
+                class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 rounded-lg transition-colors">
+                Login
+            </button>
+        </form>
+
+        <!-- REGISTER FORM -->
+        <form id="register-form" action="/register" method="POST" class="space-y-5 hidden">
+            <div>
+                <label for="role" class="block text-sm font-medium text-slate-700 mb-1">I want to join as</label>
+                <select id="role" name="role" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-green-600 outline-none transition-colors">
+                    <option value="" disabled selected>Select an option...</option>
+                    <option value="donor">Donor (Donate Food)</option>
+                    <option value="volunteer">Volunteer (Distribute Food)</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="reg-username" class="block text-sm font-medium text-slate-700 mb-1">Choose a Username</label>
+                <input type="text" id="reg-username" name="username" required 
+                    class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-green-600 outline-none transition-colors">
+            </div>
+            <div>
+                <label for="reg-password" class="block text-sm font-medium text-slate-700 mb-1">Create Password</label>
+                <input type="password" id="reg-password" name="password" required 
+                    class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-green-600 outline-none transition-colors">
+            </div>
+            <button type="submit" 
+                class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 rounded-lg transition-colors">
+                Create Account
+            </button>
+        </form>
+
+        <div class="mt-6 text-center text-sm text-slate-600">
+            <p>Mock accounts for testing:</p>
+            <ul class="mt-2 space-y-1">
+                <li>Admin: <b>admin</b> / password</li>
+                <li>Donor: <b>donor1</b> / password</li>
+                <li>Volunteer: <b>vol1</b> / password</li>
+            </ul>
+        </div>
+        <div class="mt-6 text-center">
+            <a href="/index.html" class="text-green-600 hover:underline text-sm font-medium">← Back to Home</a>
+        </div>
+    </div>
+</body>
+</html>
