@@ -1,24 +1,26 @@
 {
-  "name": "fsd_lab_feedtheneed",
-  "version": "1.0.0",
-  "description": "A responsive web platform that connects surplus food donors with NGOs and people in need, helping reduce food waste and fight hunger.",
-  "main": "index.js",
+  "name": "fsd-lab-feedtheneed",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "oxlint",
+    "preview": "vite preview"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/michael-cornelius720/FSD_LAB_FeedTheNeed.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/michael-cornelius720/FSD_LAB_FeedTheNeed/issues"
-  },
-  "homepage": "https://github.com/michael-cornelius720/FSD_LAB_FeedTheNeed#readme",
   "dependencies": {
-    "express": "^5.2.1"
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "sqlite3": "^6.0.1"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.3",
+    "oxlint": "^1.71.0",
+    "vite": "^8.1.1"
   }
 }
