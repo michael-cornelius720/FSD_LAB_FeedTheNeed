@@ -13,6 +13,8 @@ function App() {
   const [toast, setToast] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [filters, setFilters] = useState({ category: '', status: '', urgency: '' });
+  const [selectedDonationDetail, setSelectedDonationDetail] = useState(null);
 
   const API_URL = 'http://localhost:5001/api/donations';
 
@@ -33,9 +35,21 @@ function App() {
     }
   }, []);
 
-  const fetchDonations = async () => {
+  const fetchDonations = async (customFilters = filters) => {
     try {
-      const response = await fetch(API_URL);
+      const params = new URLSearchParams();
+      if (customFilters.category && customFilters.category !== 'All') {
+        params.append('category', customFilters.category);
+      }
+      if (customFilters.status && customFilters.status !== 'All') {
+        params.append('status', customFilters.status);
+      }
+      if (customFilters.urgency && customFilters.urgency !== 'All') {
+        params.append('urgency', customFilters.urgency);
+      }
+
+      const url = params.toString() ? `${API_URL}?${params.toString()}` : API_URL;
+      const response = await fetch(url);
       if (response.ok) {
         const data = await response.json();
         setDonations(data);
@@ -49,7 +63,7 @@ function App() {
 
   useEffect(() => {
     fetchDonations();
-  }, []);
+  }, [filters]);
 
   const showNotification = (message) => {
     setToast(message);
@@ -162,6 +176,21 @@ function App() {
     }
   };
 
+  const handleViewDetails = async (id) => {
+    try {
+      const response = await fetch(`${API_URL}/${id}`);
+      if (response.ok) {
+        const data = await response.json();
+        setSelectedDonationDetail(data);
+      } else {
+        showNotification('Error loading donation details.');
+      }
+    } catch (error) {
+      console.error('Error fetching donation details:', error);
+      showNotification('Error connecting to server.');
+    }
+  };
+
   const handleEditClick = (donation) => {
     setEditingDonation(donation);
     setCurrentView('donor');
@@ -254,6 +283,9 @@ function App() {
               onEdit={handleEditClick} 
               onDelete={handleDeleteDonation}
               onStatusChange={handleStatusChange}
+              filters={filters}
+              onFilterChange={setFilters}
+              onViewDetails={handleViewDetails}
             />
           </div>
         )}
@@ -286,6 +318,9 @@ function App() {
               onEdit={handleEditClick} 
               onDelete={handleDeleteDonation}
               onStatusChange={handleStatusChange}
+              filters={filters}
+              onFilterChange={setFilters}
+              onViewDetails={handleViewDetails}
             />
           </div>
         )}
@@ -322,6 +357,97 @@ function App() {
           onLoginSuccess={handleLoginSuccess}
           onCancel={() => setShowAuthModal(false)}
         />
+      )}
+
+      {selectedDonationDetail && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100 animate-scaleUp">
+            <div className="bg-gradient-to-r from-emerald-600 to-green-600 px-6 py-5 text-white flex justify-between items-center">
+              <h3 className="font-bold text-xl flex items-center gap-2">
+                <i className="fa-solid fa-circle-info"></i> Rescue Details
+              </h3>
+              <button 
+                onClick={() => setSelectedDonationDetail(null)}
+                className="text-white/80 hover:text-white transition text-lg bg-white/10 hover:bg-white/20 w-8 h-8 rounded-full flex items-center justify-center"
+              >
+                <i className="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
+              {selectedDonationDetail.photo && (
+                <div className="w-full h-48 rounded-2xl overflow-hidden bg-slate-100 border border-slate-200">
+                  <img 
+                    src={selectedDonationDetail.photo} 
+                    alt="Food item" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+              
+              <div className="space-y-3">
+                <div className="flex justify-between items-center border-b border-slate-100 pb-2">
+                  <span className="text-slate-500 text-xs font-semibold uppercase tracking-wider">Item ID</span>
+                  <span className="text-slate-800 text-sm font-mono">{selectedDonationDetail.id}</span>
+                </div>
+                <div className="flex justify-between items-center border-b border-slate-100 pb-2">
+                  <span className="text-slate-500 text-xs font-semibold uppercase tracking-wider">Food Name</span>
+                  <span className="text-slate-900 font-bold text-base">{selectedDonationDetail.foodName}</span>
+                </div>
+                <div className="flex justify-between items-center border-b border-slate-100 pb-2">
+                  <span className="text-slate-500 text-xs font-semibold uppercase tracking-wider">Quantity</span>
+                  <span className="text-slate-900 font-medium text-sm">{selectedDonationDetail.quantity} servings</span>
+                </div>
+                <div className="flex justify-between items-center border-b border-slate-100 pb-2">
+                  <span className="text-slate-500 text-xs font-semibold uppercase tracking-wider">Category</span>
+                  <span className="text-slate-900 font-medium text-sm">{selectedDonationDetail.category}</span>
+                </div>
+                <div className="flex justify-between items-center border-b border-slate-100 pb-2">
+                  <span className="text-slate-500 text-xs font-semibold uppercase tracking-wider">Urgency</span>
+                  <span className={`text-xs font-bold ${selectedDonationDetail.urgency === 'High' ? 'text-red-500' : selectedDonationDetail.urgency === 'Low' ? 'text-slate-400' : 'text-amber-500'}`}>{selectedDonationDetail.urgency}</span>
+                </div>
+                <div className="flex justify-between items-center border-b border-slate-100 pb-2">
+                  <span className="text-slate-500 text-xs font-semibold uppercase tracking-wider">Location</span>
+                  <span className="text-slate-900 text-sm font-medium text-right max-w-[200px] truncate" title={selectedDonationDetail.location}>{selectedDonationDetail.location}</span>
+                </div>
+                <div className="flex justify-between items-center border-b border-slate-100 pb-2">
+                  <span className="text-slate-500 text-xs font-semibold uppercase tracking-wider">Donor Name</span>
+                  <span className="text-slate-900 text-sm font-semibold">{selectedDonationDetail.donorRealName || selectedDonationDetail.donorName}</span>
+                </div>
+                {selectedDonationDetail.phone && (
+                  <div className="flex justify-between items-center border-b border-slate-100 pb-2">
+                    <span className="text-slate-500 text-xs font-semibold uppercase tracking-wider">Phone</span>
+                    <span className="text-slate-900 text-sm font-semibold">{selectedDonationDetail.phone}</span>
+                  </div>
+                )}
+                {selectedDonationDetail.volunteerName && (
+                  <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 mt-3">
+                    <div className="text-blue-800 text-xs font-bold uppercase tracking-wider mb-1">Assigned Volunteer</div>
+                    <div className="flex justify-between text-xs text-blue-900">
+                      <span><strong>Name:</strong> {selectedDonationDetail.volunteerName}</span>
+                      <span><strong>Phone:</strong> {selectedDonationDetail.volunteerPhone || 'N/A'}</span>
+                    </div>
+                  </div>
+                )}
+                {selectedDonationDetail.notes && (
+                  <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
+                    <div className="text-slate-500 text-xs font-semibold uppercase tracking-wider mb-1">Special Notes</div>
+                    <p className="text-xs text-slate-600 leading-relaxed">{selectedDonationDetail.notes}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            <div className="bg-slate-50 px-6 py-4 flex justify-end">
+              <button 
+                onClick={() => setSelectedDonationDetail(null)}
+                className="bg-slate-200 hover:bg-slate-300 text-slate-800 font-semibold px-5 py-2 rounded-xl text-sm transition"
+              >
+                Close Details
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Toast notifications */}

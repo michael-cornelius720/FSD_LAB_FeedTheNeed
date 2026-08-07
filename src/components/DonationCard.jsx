@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function DonationCard({ donation, onEdit, onDelete, onStatusChange }) {
+export default function DonationCard({ donation, onEdit, onDelete, onStatusChange, onViewDetails }) {
   const getStatusBadge = (status) => {
     switch (status) {
       case 'completed':
@@ -78,6 +78,16 @@ export default function DonationCard({ donation, onEdit, onDelete, onStatusChang
               className="text-blue-700 bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-blue-100 transition"
             >
               Mark Delivered
+            </button>
+          )}
+
+          {onViewDetails && (
+            <button 
+              onClick={() => onViewDetails(donation.id)} 
+              className="p-1.5 text-emerald-600 border border-emerald-100 rounded-lg hover:bg-emerald-50 transition w-8 h-8 flex items-center justify-center"
+              title="View Details"
+            >
+              <i className="fa-solid fa-eye text-xs"></i>
             </button>
           )}
 

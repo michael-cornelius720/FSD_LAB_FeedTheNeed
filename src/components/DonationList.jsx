@@ -1,11 +1,21 @@
 import React, { useState } from 'react';
 import DonationCard from './DonationCard';
 
-export default function DonationList({ donations, onEdit, onDelete, onStatusChange }) {
+export default function DonationList({ donations, onEdit, onDelete, onStatusChange, filters, onFilterChange, onViewDetails }) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('All');
-  const [statusFilter, setStatusFilter] = useState('All');
-  const [urgencyFilter, setUrgencyFilter] = useState('All');
+
+  const categoryFilter = filters?.category || 'All';
+  const statusFilter = filters?.status || 'All';
+  const urgencyFilter = filters?.urgency || 'All';
+
+  const handleFilterChange = (key, value) => {
+    if (onFilterChange) {
+      onFilterChange(prev => ({
+        ...prev,
+        [key]: value
+      }));
+    }
+  };
 
   const filteredDonations = donations.filter(d => {
     const matchesSearch = 
@@ -13,6 +23,8 @@ export default function DonationList({ donations, onEdit, onDelete, onStatusChan
       d.donorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       d.location.toLowerCase().includes(searchTerm.toLowerCase());
 
+    // Category, Status, Urgency are now filtered at the backend,
+    // but we keep a local fallback check just in case.
     const matchesCategory = categoryFilter === 'All' || d.category === categoryFilter;
     const matchesStatus = statusFilter === 'All' || d.status === statusFilter;
     const matchesUrgency = urgencyFilter === 'All' || d.urgency === urgencyFilter;
@@ -44,7 +56,7 @@ export default function DonationList({ donations, onEdit, onDelete, onStatusChan
 
           <select 
             value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
+            onChange={(e) => handleFilterChange('category', e.target.value)}
             className="px-3 py-2 border border-slate-200 rounded-xl text-sm focus:border-green-500 bg-white"
           >
             <option value="All">All Categories</option>
@@ -58,7 +70,7 @@ export default function DonationList({ donations, onEdit, onDelete, onStatusChan
 
           <select 
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+            onChange={(e) => handleFilterChange('status', e.target.value)}
             className="px-3 py-2 border border-slate-200 rounded-xl text-sm focus:border-green-500 bg-white"
           >
             <option value="All">All Statuses</option>
@@ -69,7 +81,7 @@ export default function DonationList({ donations, onEdit, onDelete, onStatusChan
 
           <select 
             value={urgencyFilter}
-            onChange={(e) => setUrgencyFilter(e.target.value)}
+            onChange={(e) => handleFilterChange('urgency', e.target.value)}
             className="px-3 py-2 border border-slate-200 rounded-xl text-sm focus:border-green-500 bg-white"
           >
             <option value="All">All Urgency</option>
@@ -89,6 +101,7 @@ export default function DonationList({ donations, onEdit, onDelete, onStatusChan
               onEdit={onEdit}
               onDelete={onDelete}
               onStatusChange={onStatusChange}
+              onViewDetails={onViewDetails}
             />
           ))}
         </div>
@@ -102,3 +115,4 @@ export default function DonationList({ donations, onEdit, onDelete, onStatusChan
     </div>
   );
 }
+
