@@ -52,6 +52,8 @@ export default function Header({ currentView, setCurrentView, currentUser, onLog
             <span onClick={() => handleNavClick('volunteer')} className={`font-medium text-sm cursor-pointer ${currentView === 'volunteer' ? 'text-green-600 font-bold' : 'text-slate-600 hover:text-green-600'}`}>Volunteer Portal</span>
           )}
 
+          <span onClick={() => handleNavClick('fs-demo')} className={`font-medium text-sm cursor-pointer ${currentView === 'fs-demo' ? 'text-green-600 font-bold' : 'text-slate-600 hover:text-green-600'}`}>File System</span>
+
           {(!currentUser || currentUser.role === 'donor') && (
             <span onClick={() => handleNavClick('donor')} className="text-white font-semibold px-5 py-2 rounded-lg text-sm hover:opacity-90 transition-opacity cursor-pointer" style={{ background: 'linear-gradient(135deg, #16a34a, #22c55e)' }}>Donate Food</span>
           )}
@@ -110,6 +112,8 @@ export default function Header({ currentView, setCurrentView, currentUser, onLog
             {(!currentUser || currentUser.role === 'volunteer') && (
               <span onClick={() => handleNavClick('volunteer')} className="cursor-pointer">Volunteer Portal</span>
             )}
+
+            <span onClick={() => handleNavClick('fs-demo')} className="cursor-pointer">File System</span>
 
             {(!currentUser || currentUser.role === 'donor') && (
               <span onClick={() => handleNavClick('donor')} className="bg-green-600 text-white text-center py-2.5 rounded-lg font-semibold cursor-pointer">Donate Food</span>

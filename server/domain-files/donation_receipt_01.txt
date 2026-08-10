@@ -1,0 +1,15 @@
+FEED THE NEED - SURPLUS FOOD DONATION RECEIPT
+===============================================
+Date: 10/08/2026
+Donation ID: DN-9021-X
+Donor Name: Green Leaf Restaurant
+Food Type: Prepared Meals (Rice & Veg Curry)
+Quantity: 45 Portions
+Urgency: High (Consume within 3 hours)
+Location: 12 Baker St, Downtown
+Status: Verified by Admin
+
+-----------------------------------------------
+Notes: Safely packed in thermal containers.
+Server Path: /server/domain-files/donation_receipt_01.txt
+===============================================

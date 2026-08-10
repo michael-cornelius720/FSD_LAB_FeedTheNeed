@@ -5,6 +5,7 @@ import DonationForm from './components/DonationForm';
 import DonationList from './components/DonationList';
 import AuthForm from './components/AuthForm';
 import NgoDashboard from './components/NgoDashboard';
+import FileSystemDemo from './components/FileSystemDemo';
 
 function App() {
   const [donations, setDonations] = useState([]);
@@ -349,6 +350,10 @@ function App() {
               onDelete={handleDeleteDonation}
             />
           </div>
+        )}
+
+        {currentView === 'fs-demo' && (
+          <FileSystemDemo />
         )}
       </div>
 

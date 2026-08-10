@@ -1,6 +1,21 @@
 import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
+import fs from 'fs/promises';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const DOMAIN_FILES_DIR = path.join(__dirname, 'domain-files');
+
+// Ensure domain-files directory exists
+try {
+  await fs.mkdir(DOMAIN_FILES_DIR, { recursive: true });
+  console.log('Domain files directory verified:', DOMAIN_FILES_DIR);
+} catch (err) {
+  console.error('Failed to create domain-files directory:', err);
+}
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -284,6 +299,126 @@ app.delete('/api/donations/:id', async (req, res) => {
     res.json({ message: 'Donation deleted successfully', id });
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+// =========================================================================
+// File System (FS) Demo Routes (Exercise 7)
+// =========================================================================
+
+// helper function to validate file paths to prevent directory traversal
+function getSafePath(filename) {
+  if (!filename) return null;
+  const safeName = path.basename(filename);
+  return path.join(DOMAIN_FILES_DIR, safeName);
+}
+
+// GET all files in the domain-files directory
+app.get('/api/fs/list', async (req, res) => {
+  try {
+    const files = await fs.readdir(DOMAIN_FILES_DIR);
+    const fileDetails = await Promise.all(
+      files.map(async (file) => {
+        const filePath = path.join(DOMAIN_FILES_DIR, file);
+        const stats = await fs.stat(filePath);
+        return {
+          name: file,
+          size: stats.size,
+          updatedAt: stats.mtime.toISOString(),
+        };
+      })
+    );
+    res.json(fileDetails);
+  } catch (err) {
+    res.status(500).json({ error: `Failed to list files: ${err.message}` });
+  }
+});
+
+// GET file content
+app.get('/api/fs/read/:filename', async (req, res) => {
+  try {
+    const filePath = getSafePath(req.params.filename);
+    if (!filePath) {
+      return res.status(400).json({ error: 'Invalid filename' });
+    }
+    const content = await fs.readFile(filePath, 'utf-8');
+    res.json({ filename: req.params.filename, content });
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      res.status(404).json({ error: 'File not found' });
+    } else {
+      res.status(500).json({ error: `Failed to read file: ${err.message}` });
+    }
+  }
+});
+
+// POST create/write a file
+app.post('/api/fs/create', async (req, res) => {
+  try {
+    const { filename, content } = req.body;
+    if (!filename) {
+      return res.status(400).json({ error: 'Filename is required' });
+    }
+    const filePath = getSafePath(filename);
+    await fs.writeFile(filePath, content || '', 'utf-8');
+    res.status(201).json({ message: 'File created successfully', filename });
+  } catch (err) {
+    res.status(500).json({ error: `Failed to create file: ${err.message}` });
+  }
+});
+
+// PUT update/append content to a file
+app.put('/api/fs/update/:filename', async (req, res) => {
+  try {
+    const { content, append } = req.body;
+    const filePath = getSafePath(req.params.filename);
+    if (!filePath) {
+      return res.status(400).json({ error: 'Invalid filename' });
+    }
+
+    if (append) {
+      await fs.appendFile(filePath, content || '', 'utf-8');
+    } else {
+      await fs.writeFile(filePath, content || '', 'utf-8');
+    }
+
+    res.json({ message: 'File updated successfully', filename: req.params.filename });
+  } catch (err) {
+    res.status(500).json({ error: `Failed to update file: ${err.message}` });
+  }
+});
+
+// POST rename a file
+app.post('/api/fs/rename', async (req, res) => {
+  try {
+    const { oldFilename, newFilename } = req.body;
+    if (!oldFilename || !newFilename) {
+      return res.status(400).json({ error: 'Both old and new filenames are required' });
+    }
+    const oldPath = getSafePath(oldFilename);
+    const newPath = getSafePath(newFilename);
+    await fs.rename(oldPath, newPath);
+    res.json({ message: 'File renamed successfully', oldFilename, newFilename });
+  } catch (err) {
+    res.status(500).json({ error: `Failed to rename file: ${err.message}` });
+  }
+});
+
+// DELETE a file
+app.delete('/api/fs/delete/:filename', async (req, res) => {
+  try {
+    const filePath = getSafePath(req.params.filename);
+    if (!filePath) {
+      return res.status(400).json({ error: 'Invalid filename' });
+    }
+    await fs.unlink(filePath);
+    res.json({ message: 'File deleted successfully', filename: req.params.filename });
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      res.status(404).json({ error: 'File not found' });
+    } else {
+      res.status(500).json({ error: `Failed to delete file: ${err.message}` });
+    }
   }
 });
 
